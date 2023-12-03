@@ -1,0 +1,86 @@
+services:
+  backend:
+    build:
+      args:
+        - NODE_ENV=development
+      context: .
+      target: development
+      dockerfile: ./backend/Dockerfile
+    command: pnpm run backend:watch
+    environment:
+      - DATABASE_DB=experimental-app
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=test
+      - DATABASE_HOST=db
+      - NODE_ENV=development
+    ports:
+      - 3080:3080
+    volumes:
+      - .:/code
+      - /code/node_modules/
+      - /code/backend/node_modules/
+    networks:
+      - public
+      - private
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=experimental-app
+      - POSTGRES_PASSWORD=test
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  flyway:
+    image: flyway/flyway:10.1.0
+    environment:
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=test
+      - FLYWAY_URL=jdbc:postgresql://db:5432/experimental-app
+    depends_on:
+      - db
+    volumes:
+      - ./backend/migrations/sql:/flyway/sql
+    command: -connectRetries=60 -baselineOnMigrate=true migrate
+    networks:
+      - private
+
+  frontend:
+    build:
+      context: .
+      target: development
+      dockerfile: ./frontend/Dockerfile
+    command: pnpm run frontend:watch
+    ports:
+      - 3000:1234
+    volumes:
+      - .:/code
+      - /code/node_modules/ # exclude node_modules
+      - /code/frontend/node_modules/
+      - /code/.parcel-cache/ # exclude .parcel-cache
+    networks:
+      - public
+    depends_on:
+      - backend
+
+networks:
+  public:
+  private:
+volumes:
+  db-data:

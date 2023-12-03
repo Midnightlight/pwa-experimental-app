@@ -1,0 +1,32 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend for experimental messaging app",
+  "scripts": {
+    "dev": "parcel src/**/*.html",
+    "build": "parcel build"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@types/react": "^18.2.41",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "parcel": "^2.10.3",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "styled-components": "^6.1.1"
+  },
+  "optionalDependencies": {
+    "@parcel/watcher-linux-arm64-glibc": "^2.3.0",
+    "@parcel/watcher-linux-x64-glibc": "^2.3.0"
+  }
+}
