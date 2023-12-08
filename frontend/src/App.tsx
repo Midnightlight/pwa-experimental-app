@@ -1,6 +1,15 @@
 import { createGlobalStyle } from "styled-components";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Outlet,
+  RouterProvider,
+  useNavigate,
+} from "react-router-dom";
 import { Conversation } from "./routes/Conversation";
+import { UserChooser } from "./routes/UserChooser";
+import { Context, ContextProvider } from "./Context";
+import { Threads } from "./routes/Threads";
+import { useContext, useEffect } from "react";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -13,22 +22,44 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+function Authed() {
+  const ctx = useContext(Context);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!ctx.loggedIn) {
+      navigate("/");
+    }
+  }, [ctx]);
+
+  return <Outlet />;
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Hello world!</div>,
+    element: <UserChooser />,
   },
   {
-    path: "/conversation/:userId",
-    element: <Conversation />,
+    element: <Authed />,
+    children: [
+      {
+        path: "/conversation/:userId",
+        element: <Conversation />,
+      },
+      {
+        path: "/threads",
+        element: <Threads />,
+      },
+    ],
   },
 ]);
 
 export function App() {
   return (
-    <div>
+    <ContextProvider>
       <GlobalStyle />
       <RouterProvider router={router} />
-    </div>
+    </ContextProvider>
   );
 }
