@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export function Threads() {
   const { data } =
     useSWR<{ id: string; name: string; latestMessageContent: string }[]>(
-      "/threads",
+      "/api/threads",
     );
 
   return (

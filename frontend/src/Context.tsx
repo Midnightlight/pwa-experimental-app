@@ -56,7 +56,7 @@ export function ContextProvider({ children }: PropsWithChildren) {
     let unmountClosed = false;
     let ws: WebSocket;
     const connect = () => {
-      ws = new WebSocket("ws://localhost:3081");
+      ws = new WebSocket("wss://localhost/ws/");
 
       ws.addEventListener("message", (event) => {
         const { type, data } = JSON.parse(event.data);
@@ -102,7 +102,7 @@ export function ContextProvider({ children }: PropsWithChildren) {
       <SWRConfig
         value={{
           fetcher: (resource: string, init?: RequestInit) =>
-            fetch(`http://localhost:3080${resource}`, {
+            fetch(resource, {
               ...(init ?? {}),
               headers: {
                 ...(init?.headers ?? {}),

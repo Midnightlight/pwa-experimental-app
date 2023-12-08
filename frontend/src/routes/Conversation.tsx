@@ -8,7 +8,7 @@ import useSWRMutation from "swr/mutation";
 export function Conversation() {
   const { userId } = useParams<{ userId: string }>();
 
-  const { data } = useSWR<Message[]>(`/conversation/${userId}`);
+  const { data } = useSWR<Message[]>(`/api/conversation/${userId}`);
   const ctx = useContext(Context);
 
   const [inputMessage, setInputMessage] = useState("");
@@ -42,7 +42,7 @@ export function Conversation() {
       />
       <button
         onClick={() => {
-          fetch("http://localhost:3080/message", {
+          fetch("/api/message", {
             method: "POST",
             headers: {
               "x-user-id": ctx.user.id,

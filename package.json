@@ -5,7 +5,8 @@
   "scripts": {
     "frontend:watch": "pnpm run --filter frontend dev",
     "backend:watch": "pnpm run --filter backend dev",
-    "watch": "pnpm run dev"
+    "watch": "pnpm run dev",
+    "generate-certs": "openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -sha256 -days 365 -subj \"/C=FI/ST=Helsinki/L=Helsinki/O=Aalto/OU=Test/CN=localhost\""
   },
   "keywords": [],
   "contributors": [

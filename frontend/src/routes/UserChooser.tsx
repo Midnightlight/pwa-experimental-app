@@ -4,7 +4,7 @@ import { Context, User } from "../Context";
 import { useNavigate } from "react-router-dom";
 
 export function UserChooser() {
-  const { data, error, isLoading } = useSWR<User[]>("/users");
+  const { data, error, isLoading } = useSWR<User[]>("/api/users");
 
   const [chosenUser, setChosenUser] = useState<User | null>(null);
 
