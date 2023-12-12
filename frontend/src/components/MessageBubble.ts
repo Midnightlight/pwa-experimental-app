@@ -3,11 +3,19 @@ import { styled } from "styled-components";
 export const MessageBubble = styled.div<{ $type: "sender" | "receiver" }>`
   background-color: ${({ $type }) => ($type === "sender" ? "#dcf8c6" : "#fff")};
   color: #000;
-  padding: 5px 8px;
+  padding: 0px 12px;
   border-radius: 11px;
   box-shadow: 1px 1px 1px 1px rgba(207, 207, 207, 0.36);
   position: relative;
   margin-top: 8px;
+  max-width: fit-content;
+  margin-right: ${({ $type }) =>
+    $type === "sender" ? "0.5rem" : "auto"};
+  margin-left: ${({ $type }) =>
+    $type === "sender" ? "auto" : "0.5rem"};
+  display: flex;
+  width: 100%;
+  flex-direction: column;
 
   &::after {
     content: "";
@@ -21,6 +29,11 @@ export const MessageBubble = styled.div<{ $type: "sender" | "receiver" }>`
     );
     ${({ $type }) => ($type === "sender" ? "transform: scaleX(-1);" : "")}
     background-color: ${({ $type }) =>
-      $type === "sender" ? "#dcf8c6" : "#fff"};
+    $type === "sender" ? "#dcf8c6" : "#fff"};
   }
+`;
+
+export const InputTextAndButtons = styled.div`
+  display: flex;  
+  margin-top: 10px;
 `;

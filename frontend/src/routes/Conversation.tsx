@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { MessageBubble } from "../components/MessageBubble";
+import { MessageBubble, InputTextAndButtons } from "../components/MessageBubble";
 import useSWR from "swr";
 import { Context, Message } from "../Context";
 import { useContext, useState, useEffect, useRef } from "react";
@@ -7,12 +7,12 @@ import useSWRMutation from "swr/mutation";
 
 export function Conversation() {
   const { userId } = useParams<{ userId: string }>();
-  const [ videoStream, setVideoStream ] = useState(null);
-  const [ snapshot, setSnapshot ] = useState(null);
+  const [videoStream, setVideoStream] = useState(null);
+  const [snapshot, setSnapshot] = useState(null);
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videoStream ) {
+    if (videoStream) {
       videoRef.current.srcObject = videoStream;
     }
   }, [videoStream]);
@@ -26,6 +26,8 @@ export function Conversation() {
     return;
   }
 
+  const fileInputRef = useRef(null);
+
   const messages = new Map([
     ...(data ?? []).map<[string, Message]>((msg) => [msg.id, msg]),
     ...(ctx.socketMessages[userId!] ?? []).map<[string, Message]>((msg) => [
@@ -37,13 +39,62 @@ export function Conversation() {
   //Camera
   const startCamera = () => {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then(stream => {
-            setVideoStream(stream);
-        })
-        .catch(error => {
-            console.error('Cant access the camera', error);
-        });
+      .then(stream => {
+        setVideoStream(stream);
+      })
+      .catch(error => {
+        console.error('Cant access the camera', error);
+      });
   }
+
+  const sendImage = async (image) => {
+    try {
+      const response = await fetch("/api/message", {
+        method: "POST",
+        headers: {
+          "x-user-id": ctx.user.id,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ content: image, receiverId: userId }),
+      });
+
+      if (response.ok) {
+        // Optionally handle success
+      } else {
+        console.error("Failed to send image");
+      }
+    } catch (error) {
+      console.error("Error sending image:", error);
+    }
+  }
+
+  const handleImageUpload = () => {
+    fileInputRef.current.click();
+  };
+
+  const convertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
+  const onFileInputChange = async (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const base64 = await convertBase64(file);
+      sendImage(base64);
+    }
+  };
 
   const takeSnapshot = () => {
     if (videoStream) {
@@ -70,7 +121,7 @@ export function Conversation() {
       stopCamera();
       res.json();
     });
-    
+
   }
 
   const stopCamera = () => {
@@ -92,58 +143,70 @@ export function Conversation() {
           {message.content.startsWith('data:') && (
             <img src={message.content} alt="Snapshot" />
           ) || (
-            <p>{message.content}</p>
-          )}
+              <p>{message.content}</p>
+            )}
         </MessageBubble>
       ))}
+
       <input
-        type="text"
-        value={inputMessage}
-        onChange={(ev) => setInputMessage(ev.target.value)}
-      />
-      <button
-        onClick={() => {
-          fetch("/api/message", {
-            method: "POST",
-            headers: {
-              "x-user-id": ctx.user.id,
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({ content: inputMessage, receiverId: userId }),
-          }).then((res) => res.json());
-          setInputMessage("");
-        }}
-      >
-        Send message
-      </button>
+          type="text"
+          value={inputMessage}
+          onChange={(ev) => setInputMessage(ev.target.value)}
+        />
+        <button
+          onClick={() => {
+            fetch("/api/message", {
+              method: "POST",
+              headers: {
+                "x-user-id": ctx.user.id,
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({ content: inputMessage, receiverId: userId }),
+            }).then((res) => res.json());
+            setInputMessage("");
+          }}
+        >
+          Send message
+        </button>
 
-      {!videoStream && !snapshot && (
-        <button onClick={startCamera}>Start Camera</button>
-      )}
+        {!videoStream && !snapshot && (
+          <button onClick={startCamera}>Start Camera</button>
+        )}
 
-      {videoStream && !snapshot && (
-        <div>
-          <video
-            ref={videoRef}
-            width="640"
-            height="480"
-            style={{ display: videoStream ? 'block' : 'none' }}
-            autoPlay
-            playsInline
-          ></video>
-          <button onClick={takeSnapshot}>Take Snapshot</button>
-          <button onClick={stopCamera}>Cancel</button>
-        </div>
-      )}
+        {videoStream && !snapshot && (
+          <div>
+            <video
+              ref={videoRef}
+              width="640"
+              height="480"
+              style={{ display: videoStream ? 'block' : 'none' }}
+              autoPlay
+              playsInline
+            ></video>
+            <button onClick={takeSnapshot}>Take Snapshot</button>
+            <button onClick={stopCamera}>Cancel</button>
+          </div>
+        )}
 
-      {snapshot && (
-        <div>
-          <img src={snapshot} alt="Snapshot" />
-          <button onClick={sendSnapshot}>Send</button>
-          <button onClick={stopCamera}>Cancel</button>
-        </div>
-      )}
+        {snapshot && (
+          <div>
+            <img src={snapshot} alt="Snapshot" />
+            <button onClick={sendSnapshot}>Send</button>
+            <button onClick={stopCamera}>Cancel</button>
+          </div>
+        )}
 
-    </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={onFileInputChange}
+        />
+        <button onClick={handleImageUpload}>Upload Image</button>
+
+        
+      </div>
+
+  
   );
 }
