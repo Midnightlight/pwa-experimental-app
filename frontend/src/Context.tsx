@@ -56,7 +56,7 @@ export function ContextProvider({ children }: PropsWithChildren) {
     let unmountClosed = false;
     let ws: WebSocket;
     const connect = () => {
-      ws = new WebSocket("wss://localhost/ws/");
+      ws = new WebSocket("wss://192.168.86.53/ws/");
 
       ws.addEventListener("message", (event) => {
         const { type, data } = JSON.parse(event.data);
